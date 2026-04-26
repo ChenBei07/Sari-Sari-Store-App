@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "Sari-Sari Store Tracker",
+    "slug": "sari-sari-store-tracker",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0f172a"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0f172a"
+      },
+      "package": "com.sarisaristore.tracker",
+      "versionCode": 1
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sarisaristore.tracker"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "278b0b78-ddc7-4505-99de-8fbef7e6c318"
+      }
+    }
+  }
+}
