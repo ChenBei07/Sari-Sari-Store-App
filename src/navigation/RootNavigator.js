@@ -39,6 +39,7 @@ export default function RootNavigator() {
     async function init() {
       try {
         await initDatabase()
+        await new Promise(resolve => setTimeout(resolve, 500)) // wait for DB to settle
         await initAuth()
       } catch (e) {
         console.error('DB init error:', e)

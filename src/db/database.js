@@ -1,17 +1,28 @@
 import * as SQLite from 'expo-sqlite'
 
 let db = null
+let dbPromise = null
 
 export async function getDb() {
-  if (!db) {
-    db = await SQLite.openDatabaseAsync('sari-sales.db')
+  if (db) {
+    try {
+      await db.getFirstAsync('SELECT 1')
+      return db
+    } catch (e) {
+      db = null
+      dbPromise = null
+    }
   }
-  // Re-open if connection was lost
-  try {
-    await db.getFirstAsync('SELECT 1')
-  } catch (e) {
-    db = await SQLite.openDatabaseAsync('sari-sales.db')
+  if (!dbPromise) {
+    dbPromise = SQLite.openDatabaseAsync('sari-sales.db').then(instance => {
+      db = instance
+      return db
+    }).catch(e => {
+      dbPromise = null
+      throw e
+    })
   }
+  db = await dbPromise
   return db
 }
 
