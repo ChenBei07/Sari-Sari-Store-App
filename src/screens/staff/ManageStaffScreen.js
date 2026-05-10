@@ -215,7 +215,10 @@ export default function ManageStaffScreen() {
         <KeyboardAvoidingView style={styles.modalOverlay} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View style={styles.modalSheet}>
             <Text style={styles.modalTitle}>Add Staff Account</Text>
-            <ScrollView keyboardShouldPersistTaps="handled">
+            <ScrollView 
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ paddingBottom: 120 }}
+            >
 
               <Text style={styles.modalLabel}>Full Name</Text>
               <TextInput style={styles.modalInput} placeholder="Full name" placeholderTextColor="#475569" value={fullName} onChangeText={setFullName} />

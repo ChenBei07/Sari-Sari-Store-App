@@ -63,6 +63,15 @@ export async function initDatabase() {
       reference_no TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS expenses (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      description TEXT NOT NULL,
+      amount REAL NOT NULL,
+      category TEXT DEFAULT 'Restock',
+      notes TEXT DEFAULT '',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
   `)
 }
 
@@ -237,7 +246,27 @@ export async function getDashboard() {
     GROUP BY payment_method
   `, [today])
 
-  return { todaySales, weeklySales, monthlySales, topProducts, paymentBreakdown }
+  const todayExpenses = await db.getFirstAsync(`
+      SELECT COALESCE(SUM(amount), 0) as total
+      FROM expenses WHERE DATE(created_at) = DATE(?)
+    `, [today])
+
+  const monthlyExpenses = await db.getFirstAsync(`
+      SELECT COALESCE(SUM(amount), 0) as total
+      FROM expenses
+      WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', ?)
+    `, [today])
+      const allTimeSales = await db.getFirstAsync(`
+    SELECT COALESCE(SUM(total_amount), 0) as total_sales
+    FROM sales WHERE status = 'completed'
+  `)
+
+  const allTimeExpenses = await db.getFirstAsync(`
+    SELECT COALESCE(SUM(amount), 0) as total
+    FROM expenses
+  `)
+
+  return { todaySales, weeklySales, monthlySales, topProducts, paymentBreakdown, todayExpenses, monthlyExpenses, allTimeSales, allTimeExpenses }
 }
 
 export async function getLowStock() {
@@ -285,4 +314,71 @@ export async function deleteReceipt(id) {
   const db = await getDb()
   await db.runAsync('DELETE FROM receipts WHERE id = ?', [id])
   return { success: true }
+}
+
+// ── EXPENSES ──────────────────────────────────────────
+export async function addExpense(expense) {
+  const db = await getDb()
+  const result = await db.runAsync(
+    `INSERT INTO expenses (description, amount, category, notes)
+     VALUES (?, ?, ?, ?)`,
+    [expense.description, expense.amount, expense.category, expense.notes || '']
+  )
+  return { id: result.lastInsertRowId, ...expense }
+}
+
+export async function getExpenses(filters = {}) {
+  const db = await getDb()
+  let query = `SELECT * FROM expenses`
+  const params = []
+  const conditions = []
+
+  if (filters.date_from) {
+    conditions.push(`DATE(created_at) >= DATE(?)`)
+    params.push(filters.date_from)
+  }
+  if (filters.date_to) {
+    conditions.push(`DATE(created_at) <= DATE(?)`)
+    params.push(filters.date_to)
+  }
+  if (filters.category && filters.category !== 'All') {
+    conditions.push(`category = ?`)
+    params.push(filters.category)
+  }
+  if (conditions.length > 0) {
+    query += ` WHERE ` + conditions.join(' AND ')
+  }
+  query += ` ORDER BY created_at DESC`
+  return await db.getAllAsync(query, params)
+}
+
+export async function deleteExpense(id) {
+  const db = await getDb()
+  await db.runAsync('DELETE FROM expenses WHERE id = ?', [id])
+  return { success: true }
+}
+
+export async function getExpenseSummary() {
+  const db = await getDb()
+  const today = new Date().toISOString().split('T')[0]
+
+  const todayExp = await db.getFirstAsync(`
+    SELECT COALESCE(SUM(amount), 0) as total
+    FROM expenses
+    WHERE DATE(created_at) = DATE(?)
+  `, [today])
+
+  const weeklyExp = await db.getFirstAsync(`
+    SELECT COALESCE(SUM(amount), 0) as total
+    FROM expenses
+    WHERE DATE(created_at) >= DATE(?, '-7 days')
+  `, [today])
+
+  const monthlyExp = await db.getFirstAsync(`
+    SELECT COALESCE(SUM(amount), 0) as total
+    FROM expenses
+    WHERE strftime('%Y-%m', created_at) = strftime('%Y-%m', ?)
+  `, [today])
+
+  return { todayExp, weeklyExp, monthlyExp }
 }

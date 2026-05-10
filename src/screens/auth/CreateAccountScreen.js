@@ -65,7 +65,11 @@ export default function CreateAccountScreen({ navigation }) {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+      <ScrollView 
+        contentContainerStyle={styles.scroll} 
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+      >
 
         <View style={styles.header}>
           <Text style={styles.logoText}>🏪</Text>
@@ -159,7 +163,12 @@ export default function CreateAccountScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0f172a' },
-  scroll: { flexGrow: 1, padding: 24, paddingTop: 48 },
+  scroll: { 
+    flexGrow: 1, 
+    padding: 24, 
+    paddingTop: 48, 
+    paddingBottom: 120
+  },
   header: { alignItems: 'center', marginBottom: 28 },
   logoText: { fontSize: 40, marginBottom: 12 },
   title: { fontSize: 22, fontWeight: '800', color: '#f1f5f9' },

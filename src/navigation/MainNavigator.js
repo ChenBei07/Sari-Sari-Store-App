@@ -2,6 +2,7 @@ import React from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { Text, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import useAppStore from '../store/useAppStore'
 
 import DashboardScreen from '../screens/dashboard/DashboardScreen'
@@ -11,6 +12,7 @@ import NewSaleScreen from '../screens/sales/NewSaleScreen'
 import SalesHistoryScreen from '../screens/sales/SalesHistoryScreen'
 import ManageStaffScreen from '../screens/staff/ManageStaffScreen'
 import SettingsScreen from '../screens/settings/SettingsScreen'
+import ExpensesScreen from '../screens/expenses/ExpensesScreen'
 
 const Tab = createBottomTabNavigator()
 const Stack = createNativeStackNavigator()
@@ -41,10 +43,8 @@ function SalesStack() {
   )
 }
 
-export default function MainNavigator() {
-  const { user } = useAppStore()
-  const isOwner = user?.role === 'owner'
-
+function OwnerNavigator() {
+  const insets = useSafeAreaInsets()
   return (
     <Tab.Navigator
       screenOptions={{
@@ -52,9 +52,9 @@ export default function MainNavigator() {
         tabBarStyle: {
           backgroundColor: '#0f172a',
           borderTopColor: '#1e293b',
-          paddingBottom: 6,
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
           paddingTop: 6,
-          height: 60
+          height: 60 + (insets.bottom > 0 ? insets.bottom : 0),
         },
         tabBarActiveTintColor: '#3b82f6',
         tabBarInactiveTintColor: '#64748b',
@@ -76,13 +76,16 @@ export default function MainNavigator() {
         component={SalesStack}
         options={{ tabBarIcon: () => <TabIcon emoji="🛒" />, tabBarLabel: 'Sales' }}
       />
-      {isOwner && (
-        <Tab.Screen
-          name="Staff"
-          component={ManageStaffScreen}
-          options={{ tabBarIcon: () => <TabIcon emoji="👥" />, tabBarLabel: 'Staff' }}
-        />
-      )}
+      <Tab.Screen
+        name="Expenses"
+        component={ExpensesScreen}
+        options={{ tabBarIcon: () => <TabIcon emoji="💸" />, tabBarLabel: 'Expenses' }}
+      />
+      <Tab.Screen
+        name="Staff"
+        component={ManageStaffScreen}
+        options={{ tabBarIcon: () => <TabIcon emoji="👥" />, tabBarLabel: 'Staff' }}
+      />
       <Tab.Screen
         name="Settings"
         component={SettingsScreen}
@@ -90,4 +93,52 @@ export default function MainNavigator() {
       />
     </Tab.Navigator>
   )
+}
+
+function StaffNavigator() {
+  const insets = useSafeAreaInsets()
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: '#0f172a',
+          borderTopColor: '#1e293b',
+          paddingBottom: insets.bottom > 0 ? insets.bottom : 8,
+          paddingTop: 6,
+          height: 60 + (insets.bottom > 0 ? insets.bottom : 0),
+        },
+        tabBarActiveTintColor: '#3b82f6',
+        tabBarInactiveTintColor: '#64748b',
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' }
+      }}
+    >
+      <Tab.Screen
+        name="Dashboard"
+        component={DashboardScreen}
+        options={{ tabBarIcon: () => <TabIcon emoji="📊" />, tabBarLabel: 'Dashboard' }}
+      />
+      <Tab.Screen
+        name="Products"
+        component={ProductsStack}
+        options={{ tabBarIcon: () => <TabIcon emoji="📦" />, tabBarLabel: 'Products' }}
+      />
+      <Tab.Screen
+        name="Sales"
+        component={SalesStack}
+        options={{ tabBarIcon: () => <TabIcon emoji="🛒" />, tabBarLabel: 'Sales' }}
+      />
+      <Tab.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{ tabBarIcon: () => <TabIcon emoji="⚙️" />, tabBarLabel: 'Settings' }}
+      />
+    </Tab.Navigator>
+  )
+}
+
+export default function MainNavigator() {
+  const { user } = useAppStore()
+  const isOwner = user?.role === 'owner'
+  return isOwner ? <OwnerNavigator /> : <StaffNavigator />
 }

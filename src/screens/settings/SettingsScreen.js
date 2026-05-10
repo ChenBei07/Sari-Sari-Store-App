@@ -1,7 +1,7 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import {
-  View, Text, StyleSheet, TextInput, TouchableOpacity,
-  ScrollView, Alert, ActivityIndicator, KeyboardAvoidingView, Platform
+  View, Text, TextInput, TouchableOpacity,
+  StyleSheet, Alert, ScrollView, ActivityIndicator, Keyboard
 } from 'react-native'
 import { useFocusEffect } from '@react-navigation/native'
 import { getStoreInfo, updateStoreInfo } from '../../db/auth'
@@ -13,10 +13,20 @@ export default function SettingsScreen() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const { user, logout, setStoreInfo } = useAppStore()
+  const scrollRef = React.useRef(null)
 
   useFocusEffect(useCallback(() => {
     loadStoreInfo()
   }, []))
+
+  useEffect(() => {
+    const show = Keyboard.addListener('keyboardDidShow', () => {
+      setTimeout(() => {
+        scrollRef.current?.scrollTo({ y: 100, animated: true })
+      }, 100)
+    })
+    return () => show.remove()
+  }, [])
 
   async function loadStoreInfo() {
     try {
@@ -53,11 +63,13 @@ export default function SettingsScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+    <View style={styles.container}>
+      <ScrollView
+        ref={scrollRef}
+        contentContainerStyle={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
 
         {/* Header */}
         <View style={styles.header}>
@@ -142,14 +154,14 @@ export default function SettingsScreen() {
 
         <View style={{ height: 40 }} />
       </ScrollView>
-    </KeyboardAvoidingView>
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0f172a' },
   center: { flex: 1, backgroundColor: '#0f172a', justifyContent: 'center', alignItems: 'center' },
-  scroll: { padding: 16 },
+  scroll: { padding: 16, paddingBottom: 200 },
   header: { paddingTop: 52, marginBottom: 20 },
   title: { fontSize: 24, fontWeight: '800', color: '#f1f5f9' },
   card: {

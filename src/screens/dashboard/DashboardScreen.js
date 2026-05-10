@@ -49,6 +49,7 @@ export default function DashboardScreen() {
   const today = data?.todaySales
   const weekly = data?.weeklySales
   const monthly = data?.monthlySales
+  const monthlySales = data?.monthlySales
 
   return (
     <ScrollView
@@ -86,6 +87,54 @@ export default function DashboardScreen() {
         <StatCard label="Transactions" value={today?.total_transactions || 0} color="#f59e0b" />
       </View>
 
+      {/* Net Cash Today */}
+      <Text style={styles.sectionTitle}>Net Cash Today</Text>
+      <View style={[styles.netCard, { borderColor: ((today?.total_sales || 0) - (data?.todayExpenses?.total || 0)) >= 0 ? '#10b981' : '#ef4444' }]}>
+        <View>
+          <Text style={styles.netLabel}>Sales - Expenses</Text>
+          <Text style={styles.netSub}>
+            {peso(today?.total_sales)} - {peso(data?.todayExpenses?.total || 0)}
+          </Text>
+        </View>
+        <Text style={[styles.netValue, {
+          color: ((today?.total_sales || 0) - (data?.todayExpenses?.total || 0)) >= 0 ? '#10b981' : '#ef4444'
+        }]}>
+          {peso((today?.total_sales || 0) - (data?.todayExpenses?.total || 0))}
+        </Text>
+      </View>
+
+      {/* Net Cash This Month */}
+      <Text style={styles.sectionTitle}>Net Cash This Month</Text>
+      <View style={[styles.netCard, { borderColor: ((monthly?.total_sales || 0) - (data?.monthlyExpenses?.total || 0)) >= 0 ? '#10b981' : '#ef4444' }]}>
+        <View>
+          <Text style={styles.netLabel}>Sales - Expenses</Text>
+          <Text style={styles.netSub}>
+            {peso(monthly?.total_sales)} - {peso(data?.monthlyExpenses?.total || 0)}
+          </Text>
+        </View>
+        <Text style={[styles.netValue, {
+          color: ((monthly?.total_sales || 0) - (data?.monthlyExpenses?.total || 0)) >= 0 ? '#10b981' : '#ef4444'
+        }]}>
+          {peso((monthly?.total_sales || 0) - (data?.monthlyExpenses?.total || 0))}
+        </Text>
+      </View>
+
+      {/* Net Cash All Time */}
+      <Text style={styles.sectionTitle}>Net Cash Since Start</Text>
+      <View style={[styles.netCard, { borderColor: ((data?.allTimeSales?.total_sales || 0) - (data?.allTimeExpenses?.total || 0)) >= 0 ? '#10b981' : '#ef4444' }]}>
+        <View>
+          <Text style={styles.netLabel}>Total Sales - Total Expenses</Text>
+          <Text style={styles.netSub}>
+            {peso(data?.allTimeSales?.total_sales || 0)} - {peso(data?.allTimeExpenses?.total || 0)}
+          </Text>
+        </View>
+        <Text style={[styles.netValue, {
+          color: ((data?.allTimeSales?.total_sales || 0) - (data?.allTimeExpenses?.total || 0)) >= 0 ? '#10b981' : '#ef4444'
+        }]}>
+          {peso((data?.allTimeSales?.total_sales || 0) - (data?.allTimeExpenses?.total || 0))}
+        </Text>
+      </View>
+      
       {/* Weekly & Monthly */}
       <Text style={styles.sectionTitle}>This Week</Text>
       <View style={styles.statsRow}>
@@ -194,5 +243,13 @@ const styles = StyleSheet.create({
   topInfo: { flex: 1 },
   topName: { color: '#f1f5f9', fontWeight: '600', fontSize: 13 },
   topQty: { color: '#64748b', fontSize: 11, marginTop: 2 },
-  topRevenue: { color: '#10b981', fontWeight: '700', fontSize: 13 }
+  topRevenue: { color: '#10b981', fontWeight: '700', fontSize: 13 },
+  netCard: {
+    backgroundColor: '#1e293b', borderRadius: 12, padding: 16,
+    flexDirection: 'row', justifyContent: 'space-between',
+    alignItems: 'center', borderWidth: 2, marginBottom: 8
+  },
+  netLabel: { color: '#94a3b8', fontSize: 13, fontWeight: '600' },
+  netSub: { color: '#64748b', fontSize: 11, marginTop: 2 },
+  netValue: { fontSize: 22, fontWeight: '800' }
 })
